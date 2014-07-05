@@ -60,9 +60,9 @@ public class GDXGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		float dt = Gdx.graphics.getDeltaTime();
-		totalTime += dt*10;
+		totalTime += dt;
 		
-		Gdx.gl.glClearColor(MathUtils.sinDeg(totalTime), MathUtils.cosDeg(ball.speed), 1, 0f);
+		Gdx.gl.glClearColor(MathUtils.sinDeg(totalTime*10), 1, 1, 0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		if(Gdx.input.isKeyPressed(Input.Keys.F1)){
@@ -91,6 +91,10 @@ public class GDXGame extends ApplicationAdapter {
 				if(npos + player.sprite.getWidth()/2 < Gdx.graphics.getWidth()){
 					player.position.x = npos;
 				}
+			}
+			
+			if(Gdx.input.isKeyPressed(Input.Keys.TAB)){
+				reset();
 			}
 
 			// Move computer bat towards ball
@@ -151,10 +155,10 @@ public class GDXGame extends ApplicationAdapter {
 	public void checkBall() {
 		// Ball collides with bat
 		if(Intersector.overlaps(ball.getCollider(), player.getCollider()) && ball.position.y > player.position.y){
-			ball.paddleBounce();
+			ball.paddleBounce(player);
 		}
 		else if(Intersector.overlaps(ball.getCollider(), computer.getCollider()) && ball.position.y < computer.position.y){
-			ball.paddleBounce();
+			ball.paddleBounce(computer);
 		}
 
 		// Ball hits edge

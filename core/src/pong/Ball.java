@@ -9,20 +9,23 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Ball {
 
-	Sprite sprite;
-	Vector2 position;
-	Circle collider;
-	float radius;
-	float direction;
-	float speed;
-	float maxSpeed;
+	private Sprite sprite;
+	protected Vector2 position;
+	private Circle collider;
+	protected float radius;
+	private float direction;
+	private float speed;
+	private float maxSpeed;
 
-	float wallBounceTimer;
-	float paddleBounceTimer;
-	boolean canBounceWall;
-	boolean canBouncePaddle;
-	final float min = 0.25f;
-	final float maxXSpeed = Gdx.graphics.getWidth()*2;
+	private float wallBounceTimer;
+	private float paddleBounceTimer;
+	private boolean canBounceWall;
+	private boolean canBouncePaddle;
+	private final float min = 0.25f;
+	private final float maxXSpeed = Gdx.graphics.getWidth()*2;
+	
+	private final float WALL_SPEED_INCREASE = 1.01f;
+	private final float PADDLE_SPEED_INCREASE = 1.02f;
 
 	public Ball(Sprite spr, Vector2 pos){
 		sprite = spr;
@@ -90,37 +93,29 @@ public class Ball {
 	 */
 	public void wallBounce(){
 		if(canBounceWall){
-			float cosDeg = MathUtils.cosDeg(direction);
-			float sinDeg = MathUtils.sinDeg(direction);
-			if(cosDeg > 0){
-				if(sinDeg > 0) {
-					// Traveling up & right
-					direction = 450 + direction;
-				} else {
-					direction = 270 - direction;
-				}
-			} else {
-				if(sinDeg > 0) {
-					// Traveling down & right
-					direction = 180 + (360-direction);
-				} else {
-					// Traveling down & left
-					direction = 450 - direction;
-				}
-			}
+			direction = 180 - direction;
 			checkDirection();
 			canBounceWall = false;
 			wallBounceTimer = 0.0f;
+			speed *= WALL_SPEED_INCREASE;
 		}
 	}
 
-	public void paddleBounce(){
+	public void paddleBounce(Bat paddle){
 		if(canBouncePaddle){
-			direction = 360-direction;
+			float diffx = paddle.position.x - this.position.x;
+			float diffy = Math.min(paddle.position.y, this.position.y) - Math.max(paddle.position.y, this.position.y);
+			float angle = MathUtils.atan2(diffy, diffx) * 180 / MathUtils.PI;
+			if(direction < 180) {
+				direction = angle;
+			}
+			else {
+				direction = 180+angle;
+			}
 			checkDirection();
 			canBouncePaddle = false;
 			paddleBounceTimer = 0.0f;
-			speed *= 1.02;
+			speed *= PADDLE_SPEED_INCREASE;
 		}
 	}
 	
@@ -144,6 +139,7 @@ public class Ball {
 		if(MathUtils.random() < 0.5) {
 			direction = -direction;
 		}
+		checkDirection();
 		speed = Gdx.graphics.getHeight() * 0.75f;
 	}
 
